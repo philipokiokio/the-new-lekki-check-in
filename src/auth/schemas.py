@@ -3,10 +3,18 @@ from datetime import datetime
 from typing import Optional
 
 # 3rd party
-from pydantic import EmailStr
+from pydantic import EmailStr, constr
 
 # application import
 from src.app.utils.schemas_utils import AbstractModel, ResponseModel
+
+
+# Member DTO
+class Join(AbstractModel):
+    name: str
+    email: EmailStr
+    phone_number: constr(min_length=11, max_length=11)
+    is_visitor: bool
 
 
 # Email DTO (Used for token verification)
@@ -15,19 +23,18 @@ class TokenData(AbstractModel):
 
 
 # Create new user
-class user_create(AbstractModel):
-    first_name: str
-    last_name: str
+class AdminCreate(AbstractModel):
+    name: str
     email: EmailStr
     password: str
-    is_verified: bool = False
+    is_admin: bool = True
 
 
 # ORM response
-class UserResponse(AbstractModel):
-    first_name: str
-    last_name: str
+class MemberResponse(AbstractModel):
+    name: str
     email: EmailStr
+    role: str
     date_created: datetime
 
 
@@ -42,14 +49,15 @@ class ChangePassword(PasswordData):
 
 
 # User Update DTO
-class UserUpdate(AbstractModel):
-    first_name: Optional[str]
-    last_name: Optional[str]
+class MemberUpdate(AbstractModel):
+    name: Optional[str]
+    phone_number: Optional[str]
+    email: Optional[EmailStr]
 
 
 # Req-Res Response DTO
-class MessageUserResponse(ResponseModel):
-    data: UserResponse
+class MessageMembResponse(ResponseModel):
+    data: MemberResponse
 
 
 # Token DTO
@@ -62,15 +70,8 @@ class RefreshToken(Token):
     header: str
 
 
-# Login ORM Response
-class LoginResponse(AbstractModel):
-    data: UserResponse
-
-    refresh_token: RefreshToken
-
-
 # Req-Res Login Response
 class MessageLoginResponse(ResponseModel):
-    data: LoginResponse
     access_token: str
     token_type: str
+    refresh_token: RefreshToken

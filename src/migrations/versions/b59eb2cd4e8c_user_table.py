@@ -17,14 +17,15 @@ depends_on = None
 
 def upgrade() -> None:
     op.create_table(
-        "users",
+        "members",
         sa.Column("id", sa.Integer),
-        sa.Column("first_name", sa.String(), nullable=False),
-        sa.Column("last_name", sa.String(), nullable=False),
+        sa.Column("name", sa.String, nullable=False),
         sa.Column("email", sa.String, unique=True, nullable=False),
-        sa.Column("password", sa.String, nullable=False),
-        sa.Column("is_verified", sa.Boolean, nullable=False),
-        sa.Column("is_premium", sa.Boolean, nullable=False),
+        sa.Column("password", sa.String, nullable=True),
+        sa.Column("phone_number", sa.String, unique=True, nullable=True),
+        sa.Column("is_visitor", sa.Boolean),
+        sa.Column("visitor_count", sa.Integer, nullable=False),
+        sa.Column("is_admin", sa.Boolean, nullable=False),
         sa.Column(
             "date_created", sa.TIMESTAMP(timezone=True), server_default=sa.text("now()")
         ),
@@ -34,9 +35,9 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id"),
     )
     op.create_table(
-        "user_refresh_token",
+        "refresh_tokens",
         sa.Column("id", sa.Integer),
-        sa.Column("user_id", sa.Integer, nullable=False),
+        sa.Column("member_id", sa.Integer, nullable=False),
         sa.Column("token", sa.String, nullable=False),
         sa.Column(
             "date_created", sa.TIMESTAMP(timezone=True), server_default=sa.text("now()")
@@ -45,13 +46,13 @@ def upgrade() -> None:
             "date_updated", sa.TIMESTAMP(timezone=True), server_default=sa.text("now()")
         ),
         sa.PrimaryKeyConstraint("id"),
-        sa.ForeignKeyConstraint(["user_id"], ["users.id"], ondelete="CASCADE"),
+        sa.ForeignKeyConstraint(["member_id"], ["members.id"], ondelete="CASCADE"),
     )
     pass
 
 
 def downgrade() -> None:
-    op.drop_constraint("user_refresh_token_user_id_fkey", "user_refresh_token")
-    op.drop_table("user_refresh_token")
-    op.drop_table("users")
+    op.drop_constraint("refresh_tokens_member_id_fkey", "refresh_tokens")
+    op.drop_table("refresh_tokens")
+    op.drop_table("members")
     pass

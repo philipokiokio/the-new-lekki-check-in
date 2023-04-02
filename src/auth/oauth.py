@@ -10,7 +10,7 @@ from jose import JWTError, jwt
 
 # Apoplication imports
 from src.app.config import auth_settings
-from src.auth.auth_repository import token_repo, user_repo
+from src.auth.memb_repo import token_repo, memb_repo
 from src.auth.schemas import TokenData
 
 # OAUTH Login Endpoint
@@ -96,7 +96,7 @@ def get_current_user(token: str = Depends(oauth_schemes)):
     except JWTError:
         credential_exception()
 
-    user_check = user_repo.get_user(token_data.email)
+    user_check = memb_repo.get_member(token_data.email)
 
     if not user_check:
         credential_exception()
