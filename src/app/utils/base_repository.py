@@ -44,4 +44,6 @@ class BaseRepo:
             db_sess.rollback()
         finally:
             db_sess.close()
+        SessionLocal.close()
+
         SessionLocal.remove()

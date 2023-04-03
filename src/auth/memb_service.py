@@ -38,8 +38,8 @@ class MembService:
         memb_ = memb.__dict__
         if memb.is_admin:
             memb_["role"] = "Admin"
-        elif memb.is_vistor:
-            memb_["role"] = "Vistor"
+        elif memb.is_visitor:
+            memb_["role"] = "Visitor"
 
         else:
             memb_["role"] = "Member"
@@ -52,6 +52,7 @@ class MembService:
             {
                 "member_id": member.id,
                 "date": today,
+                "year": date.today().year,
                 "sunday_service": is_sunday(),
                 "midweek_service": not is_sunday(),
             }
@@ -65,7 +66,8 @@ class MembService:
                 detail=f"you are not of member of {church}",
                 status_code=status.HTTP_404_NOT_FOUND,
             )
-        memb_check.count = memb_check.count + 1
+        memb_check: Member
+        memb_check.attendance_count = memb_check.attendance_count + 1
 
         if memb_check.is_visitor:
             if memb_check.visitor_count == 4:
@@ -73,7 +75,7 @@ class MembService:
                 # post req to THeNew DB
 
             else:
-                memb_check.visitor_count = memb_check.vistor_count + 1
+                memb_check.visitor_count = memb_check.visitor_count + 1
 
         memb_check = self.memb_repo.update(memb_check)
         self.create_attendance(memb_check)
@@ -93,9 +95,9 @@ class MembService:
 
         member_dict = member.dict()
         if member.is_visitor:
-            member_dict["vistor_count"] = 1
+            member_dict["visitor_count"] = 1
 
-        member_dict["count"] = 1
+        member_dict["attendance_count"] = 1
         member_dict["is_admin"] = False
 
         member = self.memb_repo.create(member_dict)
@@ -114,12 +116,13 @@ class MembService:
 
         # raise an Exception if user exists.
         if memb_check:
+            if memb_check.is_admin:
+                return self.orm_call(memb_check)
             # set_password
             memb_check.password = hash_password(memb.password)
+            memb_check.is_admin = True
             self.memb_repo.update(memb_check)
             return self.orm_call(memb_check)
-
-            pass
 
         # password hashing
         memb.password = hash_password(memb.password)
@@ -151,8 +154,9 @@ class MembService:
             raise HTTPException(
                 detail="User does not exist", status_code=status.HTTP_400_BAD_REQUEST
             )
+
         # verify that the password is correct.
-        pass_hash_check = verify_password(memb_check.password, user.password)
+        pass_hash_check = verify_password(memb_check.password, member.password)
         # raise credential error
         if not pass_hash_check:
             credential_exception()
@@ -163,8 +167,9 @@ class MembService:
                 status_code=status.HTTP_401_UNAUTHORIZED,
             )
         # create Access and Refresh Token
-        access_token = create_access_token(jsonable_encoder(memb_check))
-        refresh_token = create_refresh_token(jsonable_encoder(memb_check))
+        memb_check_ = {"email": memb_check.email}
+        access_token = create_access_token(memb_check_)
+        refresh_token = create_refresh_token(memb_check_)
         # check if there is a previously existing refresh token
         token_check = self.token_repo.get_token(memb_check.id)
         # if token update token column

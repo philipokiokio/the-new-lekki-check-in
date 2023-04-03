@@ -25,6 +25,7 @@ def upgrade() -> None:
         sa.Column("phone_number", sa.String, unique=True, nullable=True),
         sa.Column("is_visitor", sa.Boolean),
         sa.Column("visitor_count", sa.Integer, nullable=False),
+        sa.Column("attendance_count", sa.Integer, nullable=False),
         sa.Column("is_admin", sa.Boolean, nullable=False),
         sa.Column(
             "date_created", sa.TIMESTAMP(timezone=True), server_default=sa.text("now()")

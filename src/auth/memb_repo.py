@@ -4,6 +4,7 @@ from pydantic import EmailStr
 # application import
 from src.app.utils.base_repository import BaseRepo
 from src.auth.models import RefreshToken, Member
+from typing import Optional
 
 
 class MemberRepo(BaseRepo):
@@ -11,9 +12,8 @@ class MemberRepo(BaseRepo):
         # Base Query for DB calls
         return self.db.query(Member)
 
-    def get_member(self, email: EmailStr):
+    def get_member(self, email: EmailStr) -> Optional[Member]:
         # get Member by email
-        print(email, self.base_query().all())
         return self.base_query().filter(Member.email == email).first()
 
     def create(self, member_create: dict) -> Member:

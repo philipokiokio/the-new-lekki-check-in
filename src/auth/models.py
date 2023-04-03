@@ -15,7 +15,7 @@ class Member(AbstractModel):
     phone_number = Column(String, nullable=True)
     is_visitor = Column(Boolean, nullable=False, server_default=text("false"))
     visitor_count = Column(Integer, nullable=False)
-    count = Column(Integer, nullable=False)
+    attendance_count = Column(Integer, nullable=False)
     is_admin = Column(Boolean, nullable=False, server_default=text("false"))
 
 
