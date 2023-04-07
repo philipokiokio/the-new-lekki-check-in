@@ -92,6 +92,13 @@ class MembService:
             raise HTTPException(
                 detail="this is a member", status_code=status.HTTP_409_CONFLICT
             )
+        phone_check = self.memb_repo.check_phone(member.phone_number)
+
+        if phone_check:
+            raise HTTPException(
+                detail="This phone number belongs to another user",
+                status_code=status.HTTP_404_NOT_FOUND,
+            )
 
         member_dict = member.dict()
         if member.is_visitor:
@@ -195,6 +202,19 @@ class MembService:
 
     def update_memb(self, update_member: schemas.MemberUpdate, memb: Member) -> dict:
         # update user
+        update_memb_dict = update_member.dict(exclude_unset=True)
+
+        for key, value in update_memb_dict.items():
+            setattr(memb, key, value)
+
+        return self.orm_call(self.memb_repo.update(memb))
+
+    def update_memb_by_id(
+        self, update_member: schemas.MemberUpdate, memb_id: int
+    ) -> dict:
+        # update user
+
+        memb = self.memb_repo.get_by_id(memb_id)
         update_memb_dict = update_member.dict(exclude_unset=True)
 
         for key, value in update_memb_dict.items():

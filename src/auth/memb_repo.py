@@ -15,6 +15,9 @@ class MemberRepo(BaseRepo):
         # Base Query for DB calls
         return self.db.query(Member)
 
+    def check_phone(self, phone_number: str) -> Optional[Member]:
+        return self.base_query.filter(Member.phone_number == phone_number).first()
+
     def get_member(self, email: EmailStr) -> Optional[Member]:
         # get Member by email
 

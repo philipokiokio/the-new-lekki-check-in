@@ -106,7 +106,9 @@ def logged_in_user(current_user: dict = Depends(get_current_user)):
     response_model=schemas.MessageMembResponse,
 )
 def update_user(
-    update_memb: schemas.MemberUpdate, current_user: dict = Depends(get_current_user)
+    user_id: int,
+    update_memb: schemas.MemberUpdate,
+    current_user: dict = Depends(get_current_user),
 ):
     """Update User
 
@@ -118,6 +120,34 @@ def update_user(
         _type_: resp
     """
     update_user = memb_service.update_memb(update_memb, current_user)
+
+    return {
+        "message": "User Updated Successfully",
+        "data": update_user,
+        "status": status.HTTP_200_OK,
+    }
+
+
+@memb_router.patch(
+    "/update/{memb_id}/",
+    status_code=status.HTTP_200_OK,
+    response_model=schemas.MessageMembResponse,
+)
+def update_member_by_id(
+    memb_id: int,
+    update_memb: schemas.MemberUpdate,
+    current_user: dict = Depends(get_current_user),
+):
+    """Update User
+
+    Args:
+        update_user (schemas.UserUpdate): all user fields.
+        current_user (dict, optional): _description_. Defaults to Depends(get_current_user): Logged In User.
+
+    Returns:
+        _type_: resp
+    """
+    update_user = memb_service.update_memb_by_id(update_memb, memb_id)
 
     return {
         "message": "User Updated Successfully",
