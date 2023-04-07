@@ -22,6 +22,15 @@ def check_in(check_in: schemas.TokenData):
 
 
 @memb_router.post(
+    "/admin-join/",
+    status_code=status.HTTP_200_OK,
+    response_model=schemas.MessageMembResponse,
+)
+def join(join: schemas.Join, current_user: dict = Depends(get_current_user)):
+    return memb_service.join(join)
+
+
+@memb_router.post(
     "/join/",
     status_code=status.HTTP_200_OK,
     response_model=schemas.MessageMembResponse,

@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 # application imports
 from src.auth.memb_router import memb_router, fellowship_router
+from src.attendance.router import admin_action_router
 
 # fastapi initialization
 app = FastAPI()
@@ -28,6 +29,7 @@ app.add_middleware(
 # Routers from the application
 app.include_router(memb_router)
 app.include_router(fellowship_router)
+app.include_router(admin_action_router)
 
 
 # root of the server

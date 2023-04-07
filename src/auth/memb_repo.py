@@ -5,16 +5,68 @@ from pydantic import EmailStr
 from src.app.utils.base_repository import BaseRepo
 from src.auth.models import RefreshToken, Member
 from typing import Optional
+from datetime import date
+from sqlalchemy import and_
 
 
 class MemberRepo(BaseRepo):
+    @property
     def base_query(self):
         # Base Query for DB calls
         return self.db.query(Member)
 
     def get_member(self, email: EmailStr) -> Optional[Member]:
         # get Member by email
-        return self.base_query().filter(Member.email == email).first()
+
+        return self.base_query.filter(Member.email == email).first()
+
+    def get_by_id(self, member_id: int) -> Optional[Member]:
+        # get Member by email
+
+        return self.base_query.filter(Member.id == member_id).first()
+
+    def get_by_member_info(
+        self, email: Optional[str], name: Optional[str]
+    ) -> Optional[Member]:
+        # get Member by email
+        email_filter = []
+        name_filter = []
+        if email:
+            email_filter.append(Member.email.ilike(f"%{email}%"))
+
+        if name:
+            name_filter.append(Member.name.ilike(f"%{name}%"))
+
+        filters_ = name_filter + email_filter
+
+        return self.base_query.filter(*filters_).first()
+
+    def all_members(
+        self,
+        search: Optional[str],
+        is_sunday: Optional[bool],
+        is_midweek: Optional[bool],
+        date_: Optional[date],
+    ):
+        name_filter = []
+        sunday_filter = []
+        midweek_filter = []
+        date_filter = []
+
+        if search:
+            name_filter.append(Member.name.ilike(f"%{search}%"))
+        if type(is_sunday) == bool:
+            sunday_filter.append(Member.attendance.any(sunday_service=is_sunday))
+
+        if type(is_midweek) == bool:
+            midweek_filter.append(Member.attendance.any(midweek_service=is_midweek))
+
+        if date_:
+            date_filter.append(Member.attendance.any(date=date_))
+
+        attendance_filter = sunday_filter + midweek_filter + date_filter + name_filter
+
+        return self.base_query.filter(and_(*attendance_filter)).all()
 
     def create(self, member_create: dict) -> Member:
         # create a new Member

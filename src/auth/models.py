@@ -17,6 +17,7 @@ class Member(AbstractModel):
     visitor_count = Column(Integer, nullable=False)
     attendance_count = Column(Integer, nullable=False)
     is_admin = Column(Boolean, nullable=False, server_default=text("false"))
+    attendance = relationship("Attendance", back_populates="member")
 
 
 class RefreshToken(AbstractModel):
